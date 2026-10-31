@@ -61,12 +61,14 @@ const VIEWER = {
    "tier": "base"
   },
   {
-   "tier": "forbidden",
-   "locked": true
+   "name": "惡魔之血",
+   "emo": "🩸",
+   "tier": "forbidden"
   },
   {
-   "tier": "forbidden",
-   "locked": true
+   "name": "魔女之眼",
+   "emo": "👁️",
+   "tier": "forbidden"
   },
   {
    "tier": "mutant",
@@ -206,7 +208,7 @@ const VIEWER = {
   }
  ],
  "snapshot": {
-  "phase": 1,
-  "updated": "2026/10/31 22:44"
+  "phase": 2,
+  "updated": "2026/10/31 22:55"
  }
 };
