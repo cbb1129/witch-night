@@ -58,9 +58,15 @@
   .hero .price { margin-top: 12px; font-size: 13px; color: var(--muted); }
 
   /* 共同探索進度 */
-  .prog { max-width: 420px; margin: 26px auto 0; text-align: left; }
+  .prog { max-width: 720px; margin: 28px auto 0; text-align: left; }
   .prog .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; color: var(--muted); }
   .prog .row b { color: var(--gold); font-size: 26px; }
+  /* 第一屏裡的活動階段卡片：比一般區塊精簡 */
+  .prog .track { margin: 12px 4px 34px; }
+  .prog .phases { gap: 8px; }
+  .prog .ph { padding: 10px 12px; }
+  .prog .ph h3 { font-size: 15px; }
+  .prog .ph p { font-size: 13px; margin-top: 2px; }
   .bar { height: 10px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; margin-top: 6px; }
   .bar i { display: block; height: 100%; background: linear-gradient(90deg, #8a5cff, var(--gold)); }
   .updated { margin-top: 6px; font-size: 12px; color: var(--muted); text-align: right; }
@@ -92,8 +98,6 @@
   .ph h3 b { color: var(--gold); }
   .ph h3 span { font-size: 13px; font-weight: 400; color: var(--muted); }
   .ph h3 span.open { color: var(--ok, #4fcf6a); }
-  .pct { text-align: center; color: var(--muted); font-size: 14px; }
-  .pct b { color: var(--gold); font-size: 30px; margin-left: 6px; }
   .ph p { margin: 4px 0 0; font-size: 14px; }
   .ph.taboo { border-color: rgba(215,38,61,.55); box-shadow: inset 0 0 14px rgba(215,38,61,.2); }
   .ph.mutant { border-color: rgba(201,184,255,.5); box-shadow: inset 0 0 14px rgba(201,184,255,.15); }
@@ -196,7 +200,7 @@
   .personal { display: grid; gap: 12px; }
   .pr { margin: 0; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
   .pr button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
-  .pr img { width: 100%; height: auto; display: block; }
+  .pr img { width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; display: block; }   /* 三張原圖比例不同，統一裁成同尺寸 */
   .pr figcaption { padding: 8px 12px; font-size: 13px; text-align: center; background: var(--card); }
   .pr figcaption b { color: var(--gold); }
   .rw-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
@@ -246,9 +250,10 @@
     <p><span>今晚，</span><span>魔女的坩堝向所有人開放。</span><br><span>投入素材、攪拌、等待……</span><span>沒有人知道會煉出什麼。</span><br><span>一起解開 <b id="potionTotal">15</b> 款魔藥的秘密，</span><span>把圖鑑填滿吧！</span></p>
     <a class="cta" id="donate" href="#ingredients">🧪 挑選素材・投入坩堝</a>
     <div class="price">每 NT$<span data-c="pricePerItem"></span> ＝ 1 個素材</div>
-    <div class="prog">
-      <div class="row"><span>共同探索進度</span><span><b id="foundN">0</b> / <span id="foundTotal"></span> 款已發現</span></div>
-      <div class="bar"><i id="foundBar"></i></div>
+    <div class="prog" id="phase">
+      <div class="row"><span>圖鑑解鎖進度</span><span><b id="pct">0%</b>　<span id="foundN">0</span> / <span id="foundTotal"></span> 款已發現</span></div>
+      <div class="track" id="track"></div>
+      <div class="phases" id="phases"></div>
       <div class="updated" id="updated"></div>
     </div>
   </header>
@@ -262,6 +267,13 @@
       <li><b>收集魔藥圖鑑</b><p>煉出新的魔藥就會收錄進圖鑑，魔女也會當場喝下、展現藥效！配方不對的話……坩堝可能會爆炸。</p></li>
     </ol>
     <p class="note">※ 尚未解鎖的素材無法投入。素材超過這一鍋的空位時，多出來的會自動排進下一鍋。</p>
+  </section>
+
+  <section class="framed" id="ingredients">
+    <h2>魔法素材架<small>點選素材放進調配籃，再一鍵前往抖內</small></h2>
+    <div class="pick-bar"><button class="rand" id="randomPick" type="button">🎲 隨機搭配 <span data-c="potSize"></span> 個素材</button></div>
+    <div class="ings" id="ings"></div>
+    <p class="pick-note">點一次加 1 個，投入順序就是點選的順序；在下方調配籃點素材可以拿掉。<br>會開啟 DreamLink 抖內頁並帶入金額與留言，暱稱與付款請在抖內頁完成。</p>
   </section>
 
   <section class="framed" id="rewards">
@@ -278,20 +290,6 @@
     <h3 class="rw-h">個人累積獎勵</h3>
     <div class="personal" id="personal"></div>
     <p class="rw-note">※ 點圖片可以放大。</p>
-  </section>
-
-  <section class="framed" id="phase">
-    <h2>活動階段<small>活動推進就會解鎖新素材；進度依魔藥圖鑑的收集比例計算</small></h2>
-    <div class="pct">圖鑑解鎖進度 <b id="pct">0%</b></div>
-    <div class="track" id="track"></div>
-    <div class="phases" id="phases"></div>
-  </section>
-
-  <section class="framed" id="ingredients">
-    <h2>魔法素材架<small>點選素材放進調配籃，再一鍵前往抖內</small></h2>
-    <div class="pick-bar"><button class="rand" id="randomPick" type="button">🎲 隨機搭配 <span data-c="potSize"></span> 個素材</button></div>
-    <div class="ings" id="ings"></div>
-    <p class="pick-note">點一次加 1 個，投入順序就是點選的順序；在下方調配籃點素材可以拿掉。<br>會開啟 DreamLink 抖內頁並帶入金額與留言，暱稱與付款請在抖內頁完成。</p>
   </section>
 
   <section class="framed" id="dex">
@@ -338,7 +336,6 @@ document.querySelectorAll('#hintAt, .hintAt').forEach(el => el.textContent = C.h
 const TOTAL = VIEWER.potions.length, FOUND = VIEWER.potions.filter(p => p.found).length;
 $('potionTotal').textContent = $('foundTotal').textContent = TOTAL;
 $('foundN').textContent = FOUND;
-$('foundBar').style.width = (FOUND / TOTAL * 100) + '%';
 $('updated').textContent = `資料更新：${SNAP.updated}（台北時間）`;
 
 // 活動階段：不顯示金額，進度條＝圖鑑收集比例（15 款全收集＝100%）
