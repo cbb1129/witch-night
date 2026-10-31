@@ -3,9 +3,6 @@ const VIEWER = {
  "config": {
   "pricePerItem": 100,
   "potSize": 12,
-  "phase2At": 12000,
-  "phase3At": 18000,
-  "goal": 30000,
   "hintAt": [
    4,
    8,
@@ -64,19 +61,16 @@ const VIEWER = {
    "tier": "base"
   },
   {
-   "name": "惡魔之血",
-   "emo": "🩸",
-   "tier": "forbidden"
+   "tier": "forbidden",
+   "locked": true
   },
   {
-   "name": "魔女之眼",
-   "emo": "👁️",
-   "tier": "forbidden"
+   "tier": "forbidden",
+   "locked": true
   },
   {
-   "name": "死者之花",
-   "emo": "🥀",
-   "tier": "mutant"
+   "tier": "mutant",
+   "locked": true
   }
  ],
  "potions": [
@@ -187,8 +181,7 @@ const VIEWER = {
   }
  ],
  "snapshot": {
-  "total": 0,
   "phase": 1,
-  "updated": "2026/10/31 08:52"
+  "updated": "2026/10/31 09:04"
  }
 };

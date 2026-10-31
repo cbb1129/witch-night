@@ -76,7 +76,7 @@
   .note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
 
   /* 階段 */
-  .track { position: relative; height: 12px; border-radius: 8px; background: rgba(255,255,255,.1); margin: 34px 4px 46px; }
+  .track { position: relative; height: 12px; border-radius: 8px; background: rgba(255,255,255,.1); margin: 18px 4px 46px; }
   .track .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 8px; background: linear-gradient(90deg, #8a5cff, var(--gold)); transition: width 1s; }
   .track .mk { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--bg); border: 2px solid var(--frame); }
   .track .mk.on { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
@@ -91,6 +91,9 @@
   .ph h3 { margin: 0; font-size: 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
   .ph h3 b { color: var(--gold); }
   .ph h3 span { font-size: 13px; font-weight: 400; color: var(--muted); }
+  .ph h3 span.open { color: var(--ok, #4fcf6a); }
+  .pct { text-align: center; color: var(--muted); font-size: 14px; }
+  .pct b { color: var(--gold); font-size: 30px; margin-left: 6px; }
   .ph p { margin: 4px 0 0; font-size: 14px; }
   .ph.taboo { border-color: rgba(215,38,61,.55); box-shadow: inset 0 0 14px rgba(215,38,61,.2); }
   .ph.mutant { border-color: rgba(201,184,255,.5); box-shadow: inset 0 0 14px rgba(201,184,255,.15); }
@@ -131,6 +134,10 @@
   .cart .clear { font: inherit; font-size: 14px; color: var(--muted); background: none; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
   .cart .cta { padding: 10px 20px; font-size: 16px; }
   .cart small { font-size: 12px; color: var(--muted); }
+  .pick-bar { text-align: center; margin: -4px 0 16px; }
+  .rand { font: inherit; font-size: 15px; font-weight: 700; color: var(--gold); cursor: pointer; padding: 9px 22px; border-radius: 999px;
+    background: rgba(255,215,106,.1); border: 1px dashed var(--frame); -webkit-tap-highlight-color: transparent; }
+  .rand:active { transform: scale(.97); }
   .pick-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
 
   /* 圖鑑 */
@@ -218,8 +225,7 @@
     <h2>參加方式<small>每一筆抖內，都是丟進坩堝的一份素材</small></h2>
     <ol class="steps">
       <li><b>抖內換素材</b><p>每 NT$<span data-c="pricePerItem"></span> 換 1 個素材，抖內 NT$<span id="eg3"></span> 就能投入 3 個。</p></li>
-      <li><b>選好素材再抖內</b><p>在下方「魔法素材架」點選想投入的素材，按「前往抖內」就會自動帶入金額和留言。也可以自己在抖內留言寫素材名稱或 emoji，想放幾個就寫幾次。</p>
-        <span class="eg">🍄🍄🌙</span><span class="eg">愛心蘑菇 月光露水</span></li>
+      <li><b>在頁面選好素材</b><p>在下方「魔法素材架」點選想投入的素材（或按「隨機搭配」），再按「前往抖內」，就會跳到抖內頁，金額和素材都已經幫你填好。</p></li>
       <li><b>坩堝滿了就揭曉</b><p>每一鍋需要 <span data-c="potSize"></span> 個素材。投入到第 <span id="hintAt"></span> 個時，坩堝會冒出提示；滿 <span data-c="potSize"></span> 個就會揭曉這鍋煉出了什麼。</p></li>
       <li><b>收集魔藥圖鑑</b><p>煉出新的魔藥就會收錄進圖鑑，魔女也會當場喝下、展現藥效！配方不對的話……坩堝可能會爆炸。</p></li>
     </ol>
@@ -227,20 +233,22 @@
   </section>
 
   <section class="framed" id="phase">
-    <h2>活動階段<small>全體累積金額越高，能用的素材就越多</small></h2>
+    <h2>活動階段<small>活動推進就會解鎖新素材；進度依魔藥圖鑑的收集比例計算</small></h2>
+    <div class="pct">圖鑑解鎖進度 <b id="pct">0%</b></div>
     <div class="track" id="track"></div>
     <div class="phases" id="phases"></div>
   </section>
 
   <section class="framed" id="ingredients">
     <h2>魔法素材架<small>點選素材放進調配籃，再一鍵前往抖內</small></h2>
+    <div class="pick-bar"><button class="rand" id="randomPick" type="button">🎲 隨機搭配 <span data-c="potSize"></span> 個素材</button></div>
     <div class="ings" id="ings"></div>
     <p class="pick-note">點一次加 1 個，投入順序就是點選的順序；在下方調配籃點素材可以拿掉。<br>會開啟 DreamLink 抖內頁並帶入金額與留言，暱稱與付款請在抖內頁完成。</p>
   </section>
 
   <section class="framed" id="dex">
     <h2>魔藥圖鑑<small>配方是秘密，只能靠大家一起實驗找出來</small></h2>
-    <p class="guide">直播中坩堝投入到第 <span class="hintAt"></span> 個素材時會變色、冒出提示，對照下面的煉製線索就能推理這鍋的方向。<br>研究線索後回直播參與素材選擇；煉成之後，重新整理這頁就能看到結果！</p>
+    <p class="guide">直播中坩堝投入到第 <span class="hintAt"></span> 個素材時會變色、冒出提示，可以對照下面的煉製線索推測這鍋的方向。</p>
     <div class="filters">
       <div class="chips" id="fType"><span>分類</span></div>
       <div class="chips" id="fState"><span>狀態</span></div>
@@ -272,7 +280,6 @@ const $ = id => document.getElementById(id);
 const C = VIEWER.config, SNAP = VIEWER.snapshot;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nt = n => n.toLocaleString('en-US');
-const wan = n => n >= 10000 ? `${+(n / 10000).toFixed(1)} 萬` : nt(n);
 
 document.querySelectorAll('[data-c]').forEach(el => el.textContent = nt(C[el.dataset.c]));
 $('eg3').textContent = nt(C.pricePerItem * 3);
@@ -285,19 +292,25 @@ $('foundN').textContent = FOUND;
 $('foundBar').style.width = (FOUND / TOTAL * 100) + '%';
 $('updated').textContent = `資料更新：${SNAP.updated}（台北時間）`;
 
-// 活動階段
+// 活動階段：不顯示金額，進度條＝圖鑑收集比例（15 款全收集＝100%）
+// 每個階段在條上佔的長度依該階段的魔藥數量分配：基礎 9／禁忌 2／變異 4
 const PHASES = [
-  { at: 0, name: '第一階段', sub: '基礎煉金', cls: '', tier: 'base', desc: '開放基礎素材，先摸清楚坩堝的脾氣。' },
-  { at: C.phase2At, name: '第二階段', sub: '禁忌研究', cls: 'taboo', tier: 'forbidden', desc: '解鎖禁忌素材，危險的魔藥開始出現。' },
-  { at: C.phase3At, name: '第三階段', sub: '變異研究', cls: 'mutant', tier: 'mutant', desc: '解鎖變異素材，傳說中的魔藥即將現身。' },
+  { name: '第一階段', sub: '基礎煉金', cls: '', tier: 'base', type: 'normal', desc: '開放基礎素材，先摸清楚坩堝的脾氣。' },
+  { name: '第二階段', sub: '禁忌研究', cls: 'taboo', tier: 'forbidden', type: 'forbidden', desc: '解鎖禁忌素材，危險的魔藥開始出現。' },
+  { name: '第三階段', sub: '變異研究', cls: 'mutant', tier: 'mutant', type: 'mutant', desc: '解鎖變異素材，傳說中的魔藥即將現身。' },
 ];
-const marks = [...PHASES.map(p => ({ at: p.at, label: p.at ? wan(p.at) : 'NT$0', name: p.sub })), { at: C.goal, label: wan(C.goal), name: '目標' }];
-$('track').innerHTML = `<div class="fill" style="width:${Math.min(100, SNAP.total / C.goal * 100)}%"></div>` +
-  marks.map(m => `<div class="mk ${SNAP.total >= m.at ? 'on' : ''}" style="left:${m.at / C.goal * 100}%"><em>${m.name}</em><span>${m.label}</span></div>`).join('');
+const PCT = Math.round(FOUND / TOTAL * 100);
+$('pct').textContent = PCT + '%';
+let acc = 0;
+const marks = PHASES.map(p => { const at = acc; acc += VIEWER.potions.filter(x => x.type === p.type).length; return { at: at / TOTAL * 100, name: p.sub }; });
+marks.push({ at: 100, name: '圖鑑完成' });
+$('track').innerHTML = `<div class="fill" style="width:${FOUND / TOTAL * 100}%"></div>` +
+  marks.map(m => `<div class="mk ${PCT >= Math.round(m.at) ? 'on' : ''}" style="left:${m.at}%" title="${m.name}"><span>${Math.round(m.at)}%</span></div>`).join('');
 $('phases').innerHTML = PHASES.map((p, i) => {
-  const ings = VIEWER.ingredients.filter(x => x.tier === p.tier).map(x => x.emo).join(' ');
+  const open = SNAP.phase >= i + 1;
+  const ings = VIEWER.ingredients.filter(x => x.tier === p.tier).map(x => x.locked ? '🔒' : x.emo).join(' ');
   return `<div class="ph ${p.cls} ${SNAP.phase === i + 1 ? 'now' : ''}">
-    <h3><b>${p.name}｜${p.sub}</b><span>${p.at ? `累積 NT$${nt(p.at)}` : '活動開始'}</span></h3>
+    <h3><b>${p.name}｜${p.sub}</b><span class="${open ? 'open' : ''}">${open ? '已解鎖' : '尚未解鎖'}</span></h3>
     <p>${p.desc}</p><p>${ings}</p></div>`;
 }).join('');
 
@@ -306,9 +319,11 @@ $('phases').innerHTML = PHASES.map((p, i) => {
 const DONATE = 'https://donate.dreamcity.studio/cbortega';
 const MSG_MAX = 100;   // DreamLink 通知留言上限
 const tierLabel = { base: '初始開放', forbidden: '禁忌素材<br>第二階段解鎖', mutant: '變異素材<br>第三階段解鎖' };
-const isLocked = i => i.tier === 'forbidden' && SNAP.phase < 2 || i.tier === 'mutant' && SNAP.phase < 3;
+// 未解鎖的禁忌／變異素材，產生器不會輸出名稱與圖示（locked: true），這裡顯示成 🔒？？？
+const isLocked = i => !!i.locked;
+const phaseOf = { forbidden: '第二', mutant: '第三' };
 $('ings').innerHTML = VIEWER.ingredients.map((i, n) => `<button class="ing ${i.tier} ${isLocked(i) ? 'locked' : ''}" data-i="${n}" type="button">
-    <span class="e">${i.emo}</span><span><b>${esc(i.name)}</b><small>${tierLabel[i.tier]}</small></span><span class="c"></span></button>`).join('');
+    <span class="e">${i.locked ? '🔒' : i.emo}</span><span><b>${i.locked ? '？？？' : esc(i.name)}</b><small>${tierLabel[i.tier]}</small></span><span class="c"></span></button>`).join('');
 let toastTimer;
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800); }
 
@@ -329,7 +344,7 @@ function renderCart() {
 $('ings').addEventListener('click', e => {
   const b = e.target.closest('.ing'); if (!b) return;
   const n = +b.dataset.i, i = VIEWER.ingredients[n];
-  if (isLocked(i)) return toast(`${i.name}在${i.tier === 'forbidden' ? '第二' : '第三'}階段才會解鎖`);
+  if (isLocked(i)) return toast(`這個素材在${phaseOf[i.tier]}階段才會解鎖`);
   if (cartMsg([...cart, n]).length > MSG_MAX) return toast('一次抖內的留言放不下更多素材了，可以分兩次投入');
   cart.push(n);
   renderCart();
@@ -341,6 +356,13 @@ $('cartItems').addEventListener('click', e => {
   renderCart();
 });
 $('cartClear').onclick = () => { cart = []; renderCart(); };
+// 隨機搭配一整鍋（只從已解鎖的素材挑，會取代目前的調配籃）
+$('randomPick').onclick = () => {
+  const pool = VIEWER.ingredients.map((i, n) => n).filter(n => !isLocked(VIEWER.ingredients[n]));
+  cart = Array.from({ length: C.potSize }, () => pool[Math.floor(Math.random() * pool.length)]);
+  renderCart();
+  toast(`已隨機放入 ${C.potSize} 個素材，可以再點素材調整`);
+};
 renderCart();
 
 // 魔藥圖鑑：分類 × 狀態篩選，未發現的排前面
