@@ -55,6 +55,14 @@
   .cta { display: inline-flex; align-items: center; gap: 10px; padding: 14px 30px; border-radius: 999px; font-weight: 700; font-size: 17px; text-decoration: none;
     color: #2a1500; background: linear-gradient(180deg, #ffe39a, #e2c094); box-shadow: 0 0 24px rgba(255,215,106,.35); }
   .cta:active { transform: scale(.97); }
+  /* 150 分鐘活動倒數 */
+  .countdown { max-width: 360px; margin: 0 auto 24px; padding: 12px 18px 14px; border: 1.5px solid var(--frame); border-radius: 4px;
+    background: rgba(13,7,24,.55); box-shadow: inset 0 0 18px rgba(226,192,148,.12); }
+  .cd-label { font-size: 13px; letter-spacing: 4px; color: var(--frame); }
+  .cd-time { font: 700 clamp(34px, 11vw, 46px)/1.15 "Noto Serif TC", serif; color: var(--gold); letter-spacing: 3px;
+    font-variant-numeric: tabular-nums; text-shadow: 0 0 18px rgba(255,215,106,.35); }
+  .cd-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .countdown.ended .cd-time { font-size: 20px; letter-spacing: 2px; padding: 6px 0; }
   .hero .price { margin-top: 12px; font-size: 13px; color: var(--muted); }
 
   /* 共同探索進度 */
@@ -172,6 +180,14 @@
   .pot dd { margin: 0 0 4px; color: var(--muted); }
   .pot dd.tbd { font-style: italic; opacity: .75; }
   .pot dd.eff { color: var(--text); }
+  /* 進階線索：公開後用金框醒目標示，橫跨整張卡片 */
+  .pot.has-adv { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(255,215,106,.5), 0 0 22px rgba(255,215,106,.22); }
+  .pot .adv { grid-column: 1 / -1; margin-top: 8px; padding: 12px 14px; border-radius: 12px; text-align: left;
+    background: linear-gradient(135deg, rgba(255,215,106,.16), rgba(138,92,255,.12)); border: 1.5px solid var(--gold); }
+  .adv-label { display: inline-block; margin-bottom: 6px; padding: 1px 10px; border-radius: 999px; font-size: 12px; letter-spacing: 1px; color: #2a1500; background: var(--gold); }
+  .pot .adv p { margin: 0; font-size: 14px; line-height: 1.85; color: var(--text); }
+  .ingchip { display: inline-block; padding: 0 8px; margin: 0 1px; border-radius: 8px; line-height: 1.6; font-weight: 700; white-space: nowrap;
+    color: var(--gold); background: rgba(13,7,24,.55); border: 1px solid rgba(255,215,106,.55); }
   .pot.forbidden { border-color: rgba(215,38,61,.5); }
   .pot.forbidden .img { background: radial-gradient(circle, rgba(215,38,61,.25), transparent 70%); }
   .pot.mutant { border-color: rgba(201,184,255,.4); }
@@ -248,6 +264,11 @@
     <h1><span>魔女之夜</span></h1>
     <div class="sub">魔 藥 研 究 手 冊</div>
     <p><span>今晚，</span><span>魔女的坩堝向所有人開放。</span><br><span>投入素材、攪拌、等待……</span><span>沒有人知道會煉出什麼。</span><br><span>一起解開 <b id="potionTotal">15</b> 款魔藥的秘密，</span><span>把圖鑑填滿吧！</span></p>
+    <div class="countdown" id="countdown" aria-live="polite">
+      <div class="cd-label" id="cdLabel"></div>
+      <div class="cd-time" id="cdTime"></div>
+      <div class="cd-sub" id="cdSub"></div>
+    </div>
     <a class="cta" id="donate" href="#ingredients">🧪 挑選素材・投入坩堝</a>
     <div class="price">每 NT$<span data-c="pricePerItem"></span> ＝ 1 個素材</div>
     <div class="prog" id="phase">
@@ -327,6 +348,33 @@ const $ = id => document.getElementById(id);
 const C = VIEWER.config, SNAP = VIEWER.snapshot;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nt = n => n.toLocaleString('en-US');
+
+// 活動倒數：固定開始時間（台灣時間），開始後倒數 150 分鐘。要改時間就改這兩行
+const EVENT_START = new Date('2026-10-31T21:00:00+08:00');
+const EVENT_MINUTES = 150;
+const EVENT_END = new Date(EVENT_START.getTime() + EVENT_MINUTES * 60000);
+const hhmm = d => d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Taipei' });
+const clock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return [Math.floor(s / 3600), Math.floor(s / 60) % 60, s % 60].map(n => String(n).padStart(2, '0')).join(':'); };
+function tickCountdown() {
+  const now = Date.now(), box = $('countdown');
+  if (now < EVENT_START) {
+    $('cdLabel').textContent = '活動即將開始';
+    $('cdTime').textContent = clock(EVENT_START - now);
+    $('cdSub').textContent = `${EVENT_START.toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric', timeZone: 'Asia/Taipei' })} ${hhmm(EVENT_START)} 開始，共 ${EVENT_MINUTES} 分鐘`;
+  } else if (now < EVENT_END) {
+    $('cdLabel').textContent = '魔女之夜倒數';
+    $('cdTime').textContent = clock(EVENT_END - now);
+    $('cdSub').textContent = `${hhmm(EVENT_END)} 結束，把握時間投入素材！`;
+  } else {
+    box.classList.add('ended');
+    $('cdLabel').textContent = '魔女之夜';
+    $('cdTime').textContent = '本次活動已結束，感謝參與！';
+    $('cdSub').textContent = '';
+    return;
+  }
+  setTimeout(tickCountdown, 1000 - (now % 1000) + 10);
+}
+tickCountdown();
 
 document.querySelectorAll('[data-c]').forEach(el => el.textContent = nt(C[el.dataset.c]));
 $('eg3').textContent = nt(C.pricePerItem * 3);
@@ -432,17 +480,19 @@ function chips(el, list, key, count) {
 chips($('fType'), TYPES, 'type', v => VIEWER.potions.filter(p => v === 'all' || p.type === v).length);
 chips($('fState'), STATES, 'state', v => VIEWER.potions.filter(p => v === 'all' || !!p.found === (v === 'found')).length);
 
+// 進階線索裡的 [[🍄 愛心蘑菇]] 顯示成素材標籤
+const chipify = s => esc(s).replace(/\[\[(.+?)\]\]/g, '<span class="ingchip">$1</span>');
 function card(p) {
   const no = String(p.no).padStart(2, '0');
-  return `<article class="pot ${p.type} ${p.found ? 'found' : ''}">
+  return `<article class="pot ${p.type} ${p.found ? 'found' : ''} ${p.advanced ? 'has-adv' : ''}">
     <div class="img">${p.found ? `<img src="potions/${esc(p.img)}.webp" alt="${esc(p.name)}" loading="lazy" width="320" height="320">` : SILHOUETTE}<span class="no">No.${no}</span></div>
     <h4>${esc(p.name)}<span class="tag ${p.type}">${typeName[p.type]}</span>${p.found ? '<span class="tag found">已發現</span>' : ''}</h4>
     <p class="hint">「${esc(p.hint)}」</p>
     <dl>
       <dt>煉製線索</dt>${p.basic ? `<dd>${esc(p.basic)}</dd>` : '<dd class="tbd">線索尚待公布</dd>'}
-      ${p.advanced ? `<dt>進階線索</dt><dd>${esc(p.advanced)}</dd>` : ''}
       <dt>實際效果</dt>${p.found ? `<dd class="eff">${esc(p.effect)}</dd>` : '<dd class="lock">🔒 煉成後公開</dd>'}
     </dl>
+    ${p.advanced ? `<div class="adv"><b class="adv-label">🔓 進階線索</b><p>${chipify(p.advanced)}</p></div>` : ''}
   </article>`;
 }
 function renderDex() {
