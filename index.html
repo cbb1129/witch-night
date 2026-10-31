@@ -110,6 +110,28 @@
   .ing.mutant small { color: var(--mutant); }
   .ing.locked { opacity: .55; }
   .ing.locked .e { filter: grayscale(1); }
+  .ing { position: relative; }
+  .ing .c { position: absolute; top: -7px; right: -7px; min-width: 24px; height: 24px; padding: 0 6px; border-radius: 12px; display: none; place-items: center;
+    font-size: 13px; font-weight: 900; color: #2a1500; background: var(--gold); box-shadow: 0 0 10px rgba(255,215,106,.5); }
+  .ing.picked { border-color: var(--gold); }
+  .ing.picked .c { display: grid; }
+
+  /* 調配籃（選了素材才出現，固定在畫面底部） */
+  .cart { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; transform: translateY(110%); transition: transform .3s;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: #0f061c; border-top: 1.5px solid var(--frame); box-shadow: 0 -8px 30px rgba(0,0,0,.5); }
+  body.has-cart .cart { transform: none; }
+  body.has-cart { padding-bottom: 150px; }
+  body.has-cart .toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
+  .cart-in { max-width: 1080px; margin: 0 auto; display: grid; gap: 8px; }
+  .cart .items { display: flex; gap: 4px; overflow-x: auto; font-size: 26px; line-height: 1.3; padding-bottom: 2px; scrollbar-width: thin; }
+  .cart .items button { font: inherit; background: none; border: 0; padding: 0 2px; cursor: pointer; flex: none; }
+  .cart .row { display: flex; align-items: center; gap: 10px; }
+  .cart .sum { flex: 1; font-size: 14px; color: var(--muted); line-height: 1.4; }
+  .cart .sum b { color: var(--gold); font-size: 20px; }
+  .cart .clear { font: inherit; font-size: 14px; color: var(--muted); background: none; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+  .cart .cta { padding: 10px 20px; font-size: 16px; }
+  .cart small { font-size: 12px; color: var(--muted); }
+  .pick-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
 
   /* 圖鑑 */
   .guide { margin: -6px 0 18px; padding: 10px 14px; border-radius: 12px; font-size: 14px; text-align: center; background: rgba(255,215,106,.08); border: 1px dashed var(--line); }
@@ -183,7 +205,7 @@
     <h1><span>魔女之夜</span></h1>
     <div class="sub">魔 藥 研 究 手 冊</div>
     <p><span>今晚，</span><span>魔女的坩堝向所有人開放。</span><br><span>投入素材、攪拌、等待……</span><span>沒有人知道會煉出什麼。</span><br><span>一起解開 <b id="potionTotal">15</b> 款魔藥的秘密，</span><span>把圖鑑填滿吧！</span></p>
-    <a class="cta" id="donate" href="https://donate.dreamcity.studio/cbortega" target="_blank" rel="noopener">🧪 前往抖內・投入素材</a>
+    <a class="cta" id="donate" href="#ingredients">🧪 挑選素材・投入坩堝</a>
     <div class="price">每 NT$<span data-c="pricePerItem"></span> ＝ 1 個素材</div>
     <div class="prog">
       <div class="row"><span>共同探索進度</span><span><b id="foundN">0</b> / <span id="foundTotal"></span> 款已發現</span></div>
@@ -196,12 +218,12 @@
     <h2>參加方式<small>每一筆抖內，都是丟進坩堝的一份素材</small></h2>
     <ol class="steps">
       <li><b>抖內換素材</b><p>每 NT$<span data-c="pricePerItem"></span> 換 1 個素材，抖內 NT$<span id="eg3"></span> 就能投入 3 個。</p></li>
-      <li><b>留言指定素材</b><p>在抖內留言寫上素材的名稱或 emoji，想放幾個就寫幾次。</p>
+      <li><b>選好素材再抖內</b><p>在下方「魔法素材架」點選想投入的素材，按「前往抖內」就會自動帶入金額和留言。也可以自己在抖內留言寫素材名稱或 emoji，想放幾個就寫幾次。</p>
         <span class="eg">🍄🍄🌙</span><span class="eg">愛心蘑菇 月光露水</span></li>
       <li><b>坩堝滿了就揭曉</b><p>每一鍋需要 <span data-c="potSize"></span> 個素材。投入到第 <span id="hintAt"></span> 個時，坩堝會冒出提示；滿 <span data-c="potSize"></span> 個就會揭曉這鍋煉出了什麼。</p></li>
       <li><b>收集魔藥圖鑑</b><p>煉出新的魔藥就會收錄進圖鑑，魔女也會當場喝下、展現藥效！配方不對的話……坩堝可能會爆炸。</p></li>
     </ol>
-    <p class="note">※ 尚未解鎖的素材無法投入。素材超過這一鍋的空位時，多出來的會自動排進下一鍋。下方的素材可以點一下複製。</p>
+    <p class="note">※ 尚未解鎖的素材無法投入。素材超過這一鍋的空位時，多出來的會自動排進下一鍋。</p>
   </section>
 
   <section class="framed" id="phase">
@@ -211,8 +233,9 @@
   </section>
 
   <section class="framed" id="ingredients">
-    <h2>魔法素材架<small>點一下素材即可複製，貼到抖內留言</small></h2>
+    <h2>魔法素材架<small>點選素材放進調配籃，再一鍵前往抖內</small></h2>
     <div class="ings" id="ings"></div>
+    <p class="pick-note">點一次加 1 個，投入順序就是點選的順序；在下方調配籃點素材可以拿掉。<br>會開啟 DreamLink 抖內頁並帶入金額與留言，暱稱與付款請在抖內頁完成。</p>
   </section>
 
   <section class="framed" id="dex">
@@ -226,11 +249,22 @@
   </section>
 
   <footer>
-    <a class="cta" href="https://donate.dreamcity.studio/cbortega" target="_blank" rel="noopener">🧪 前往抖內・投入素材</a>
+    <a class="cta" href="#ingredients">🧪 挑選素材・投入坩堝</a>
+    <p><a href="https://donate.dreamcity.studio/cbortega" target="_blank" rel="noopener">直接前往抖內頁</a></p>
     <p>魔女之夜｜魔藥研究手冊</p>
   </footer>
 </main>
 <div class="toast" id="toast"></div>
+<div class="cart" id="cart" aria-live="polite">
+  <div class="cart-in">
+    <div class="items" id="cartItems"></div>
+    <div class="row">
+      <div class="sum"><b id="cartN">0</b> 個素材・NT$<b id="cartAmt">0</b><br><small>送出前可以在留言後面加上想說的話</small></div>
+      <button class="clear" id="cartClear" type="button">清空</button>
+      <a class="cta" id="cartGo" href="#" target="_blank" rel="noopener">前往抖內 →</a>
+    </div>
+  </div>
+</div>
 
 <script>document.write('<script src="data.js?v=' + Date.now() + '"><\/script>');</script><!-- 每次都抓最新資料，避開 GitHub Pages 快取 -->
 <script>
@@ -267,21 +301,47 @@ $('phases').innerHTML = PHASES.map((p, i) => {
     <p>${p.desc}</p><p>${ings}</p></div>`;
 }).join('');
 
-// 素材架（點一下複製 emoji）
+// 素材架：點選放進調配籃，再帶著金額與留言前往 DreamLink 抖內頁
+// DreamLink 抖內頁支援 ?amount=金額&message=留言 預先填入；後台會從留言依序辨識素材 emoji
+const DONATE = 'https://donate.dreamcity.studio/cbortega';
+const MSG_MAX = 100;   // DreamLink 通知留言上限
 const tierLabel = { base: '初始開放', forbidden: '禁忌素材<br>第二階段解鎖', mutant: '變異素材<br>第三階段解鎖' };
-$('ings').innerHTML = VIEWER.ingredients.map(i => {
-  const locked = i.tier === 'forbidden' && SNAP.phase < 2 || i.tier === 'mutant' && SNAP.phase < 3;
-  return `<button class="ing ${i.tier} ${locked ? 'locked' : ''}" data-copy="${esc(i.emo)}" type="button">
-    <span class="e">${i.emo}</span><span><b>${esc(i.name)}</b><small>${tierLabel[i.tier]}</small></span></button>`;
-}).join('');
+const isLocked = i => i.tier === 'forbidden' && SNAP.phase < 2 || i.tier === 'mutant' && SNAP.phase < 3;
+$('ings').innerHTML = VIEWER.ingredients.map((i, n) => `<button class="ing ${i.tier} ${isLocked(i) ? 'locked' : ''}" data-i="${n}" type="button">
+    <span class="e">${i.emo}</span><span><b>${esc(i.name)}</b><small>${tierLabel[i.tier]}</small></span><span class="c"></span></button>`).join('');
 let toastTimer;
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 1800); }
-$('ings').addEventListener('click', async e => {
+
+let cart = [];   // 素材索引，依點選順序
+const cartMsg = list => list.map(n => VIEWER.ingredients[n].emo).join('');
+function renderCart() {
+  document.body.classList.toggle('has-cart', cart.length > 0);
+  $('cartItems').innerHTML = cart.map((n, k) => `<button type="button" data-k="${k}" title="拿掉 ${esc(VIEWER.ingredients[n].name)}">${VIEWER.ingredients[n].emo}</button>`).join('');
+  $('cartN').textContent = cart.length;
+  $('cartAmt').textContent = nt(cart.length * C.pricePerItem);
+  $('cartGo').href = `${DONATE}?amount=${cart.length * C.pricePerItem}&message=${encodeURIComponent(cartMsg(cart))}`;
+  document.querySelectorAll('.ing').forEach(b => {
+    const c = cart.filter(n => n === +b.dataset.i).length;
+    b.classList.toggle('picked', c > 0);
+    b.querySelector('.c').textContent = c;
+  });
+}
+$('ings').addEventListener('click', e => {
   const b = e.target.closest('.ing'); if (!b) return;
-  const name = b.querySelector('b').textContent;
-  try { await navigator.clipboard.writeText(b.dataset.copy); toast(`已複製 ${b.dataset.copy} ${name}`); }
-  catch { toast(`請在留言輸入 ${b.dataset.copy} 或「${name}」`); }
+  const n = +b.dataset.i, i = VIEWER.ingredients[n];
+  if (isLocked(i)) return toast(`${i.name}在${i.tier === 'forbidden' ? '第二' : '第三'}階段才會解鎖`);
+  if (cartMsg([...cart, n]).length > MSG_MAX) return toast('一次抖內的留言放不下更多素材了，可以分兩次投入');
+  cart.push(n);
+  renderCart();
+  $('cartItems').scrollLeft = $('cartItems').scrollWidth;
 });
+$('cartItems').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  cart.splice(+b.dataset.k, 1);
+  renderCart();
+});
+$('cartClear').onclick = () => { cart = []; renderCart(); };
+renderCart();
 
 // 魔藥圖鑑：分類 × 狀態篩選，未發現的排前面
 const TYPES = [['all', '全部'], ['normal', '基礎魔藥'], ['forbidden', '禁忌魔藥'], ['mutant', '變異魔藥']];
