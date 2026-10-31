@@ -174,6 +174,36 @@
   .pot.mutant .img { background: radial-gradient(circle, rgba(201,184,255,.22), transparent 70%); }
   .pot.found { box-shadow: 0 0 0 1px var(--gold), 0 0 18px rgba(255,215,106,.25); }
 
+  /* 獎勵 */
+  .rw-h { display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; font-size: 17px; letter-spacing: 3px; color: var(--frame); }
+  .rw-h:first-of-type { margin-top: 0; }
+  .rw-h::before, .rw-h::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--line)); }
+  .rw-h::after { background: linear-gradient(90deg, var(--line), transparent); }
+  .rules { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+  .rules li { padding-left: 20px; position: relative; }
+  .rules li::before { content: '✦'; position: absolute; left: 0; color: var(--frame); font-size: 12px; top: 2px; }
+  .rules b { color: var(--gold); }
+  .polas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .pola { margin: 0; padding: 8px 8px 10px; border-radius: 10px; background: var(--card); border: 1px solid rgba(255,255,255,.1); text-align: center; }
+  .pola button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .pola img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 6px; display: block; }
+  .pola figcaption { margin-top: 6px; font-size: 14px; line-height: 1.4; }
+  .pola figcaption b { display: block; color: var(--gold); }
+  .pola .st { display: inline-block; margin-top: 4px; font-size: 11px; padding: 1px 8px; border-radius: 8px; background: rgba(255,215,106,.15); color: var(--gold); }
+  .pola .st.done { background: rgba(255,255,255,.08); color: var(--muted); }
+  .pola.special { border-color: var(--frame); box-shadow: 0 0 18px rgba(255,215,106,.2); }
+  .pola.special .st { background: var(--gold); color: #2a1500; font-weight: 700; }
+  .personal { display: grid; gap: 12px; }
+  .pr { margin: 0; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+  .pr button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+  .pr img { width: 100%; height: auto; display: block; }
+  .pr figcaption { padding: 8px 12px; font-size: 13px; text-align: center; background: var(--card); }
+  .pr figcaption b { color: var(--gold); }
+  .rw-note { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+  .lightbox { position: fixed; inset: 0; z-index: 40; display: none; place-items: center; padding: 16px; background: rgba(8,2,16,.92); cursor: zoom-out; }
+  .lightbox.show { display: grid; }
+  .lightbox img { max-width: 100%; max-height: 88vh; border-radius: 8px; box-shadow: 0 0 40px rgba(0,0,0,.6); }
+
   footer { text-align: center; font-size: 13px; color: var(--muted); }
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
     padding: 10px 22px; border-radius: 999px; background: rgba(15,6,28,.95); border: 1px solid var(--frame); font-size: 14px; transition: all .3s; white-space: nowrap; }
@@ -187,6 +217,8 @@
     .phases { grid-template-columns: repeat(3, 1fr); }
     .ings { grid-template-columns: repeat(3, 1fr); }
     .dex { grid-template-columns: 1fr 1fr; }
+    .polas { grid-template-columns: repeat(3, 1fr); }
+    .personal { grid-template-columns: repeat(3, 1fr); }
   }
   @media (min-width: 900px) {
     .ings { grid-template-columns: repeat(5, 1fr); }
@@ -232,6 +264,22 @@
     <p class="note">※ 尚未解鎖的素材無法投入。素材超過這一鍋的空位時，多出來的會自動排進下一鍋。</p>
   </section>
 
+  <section class="framed" id="rewards">
+    <h2>獎勵<small>參與煉藥就有機會帶走魔女的拍立得</small></h2>
+
+    <h3 class="rw-h">魔藥拍立得</h3>
+    <ul class="rules">
+      <li>以下 <b>5 款魔藥</b>配置拍立得，煉成時<b>該鍋所有實際投入素材的觀眾</b>都能取得。</li>
+      <li>整場活動<b>第一次</b>煉成：<b>特別版（主播親筆 TO 簽）</b>；第二次起煉成：一般版。</li>
+      <li>每人每款<b>特別版、一般版各限一次</b>，最多可收藏 5 張特別版＋5 張一般版。</li>
+    </ul>
+    <div class="polas" id="polas"></div>
+
+    <h3 class="rw-h">個人累積獎勵</h3>
+    <div class="personal" id="personal"></div>
+    <p class="rw-note">※ 點圖片可以放大。</p>
+  </section>
+
   <section class="framed" id="phase">
     <h2>活動階段<small>活動推進就會解鎖新素材；進度依魔藥圖鑑的收集比例計算</small></h2>
     <div class="pct">圖鑑解鎖進度 <b id="pct">0%</b></div>
@@ -263,6 +311,7 @@
   </footer>
 </main>
 <div class="toast" id="toast"></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="放大圖片"><img id="lightboxImg" alt=""></div>
 <div class="cart" id="cart" aria-live="polite">
   <div class="cart-in">
     <div class="items" id="cartItems"></div>
@@ -406,6 +455,40 @@ function renderDex() {
   $('dexList').innerHTML = list.length ? list.map(card).join('') : '<p class="empty">這個條件下還沒有魔藥，繼續努力煉製吧！</p>';
 }
 renderDex();
+
+// 獎勵：5 款魔藥拍立得（活動開始即公開）＋個人累積獎勵
+// 首次煉成後該款不再產生特別版，卡片標示改為「一般版領取中」
+const POLAROIDS = [
+  { potion: '吸血鬼藥水', title: 'Supper at the Crimson Castle', img: 'polaroid_vampire' },
+  { potion: '綁帶藥水', title: "The Witch's Brew Stall", img: 'polaroid_bandage' },
+  { potion: '幽冥藥水', title: 'Little Ghost by the Window', img: 'polaroid_phantom' },
+  { potion: '光之藥水', title: "The Bunny's Path", img: 'polaroid_light' },
+  { potion: '狼化藥水', title: 'Howl Beneath the Crescent', img: 'polaroid_wolf' },
+];
+const foundNames = new Set(VIEWER.potions.filter(p => p.found).map(p => p.name));
+const pola = (cls, img, alt, caption) => `<figure class="pola ${cls}">
+  <button type="button" data-zoom="rewards/${img}.webp"><img src="rewards/${img}.webp" alt="${esc(alt)}" loading="lazy" width="720" height="960"></button>
+  <figcaption>${caption}</figcaption></figure>`;
+$('polas').innerHTML = POLAROIDS.map(p => pola('', p.img, `${p.potion}拍立得`,
+  `<b>${esc(p.potion)}</b>${esc(p.title)}<br><span class="st ${foundNames.has(p.potion) ? 'done' : ''}">${foundNames.has(p.potion) ? '特別版已誕生・一般版領取中' : '特別版尚未誕生'}</span>`)).join('')
+  + pola('special', 'polaroid_special_sample', '特別版範例', '<b>特別版範例</b>首次煉成限定・主播親筆 TO 簽<br><span class="st">特別版</span>');
+
+const PERSONAL = [
+  { amount: 500, name: '遊園', img: 'personal_500' },
+  { amount: 1200, name: '夜宴', img: 'personal_1200' },
+  { amount: 2500, name: '幽冥', img: 'personal_2500' },
+];
+$('personal').innerHTML = PERSONAL.map(p => `<figure class="pr">
+  <button type="button" data-zoom="rewards/${p.img}.webp"><img src="rewards/${p.img}.webp" alt="個人累積達 NT$${nt(p.amount)} 解鎖：2026 萬聖節－${p.name}" loading="lazy" width="1000" height="660"></button>
+  <figcaption>個人累積 <b>NT$${nt(p.amount)}</b>｜2026 萬聖節－${p.name}</figcaption></figure>`).join('');
+
+// 點圖放大
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-zoom]');
+  if (b) { $('lightboxImg').src = b.dataset.zoom; $('lightbox').classList.add('show'); return; }
+  if (e.target.closest('#lightbox')) $('lightbox').classList.remove('show');
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('lightbox').classList.remove('show'); });
 </script>
 </body>
 </html>
