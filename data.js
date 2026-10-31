@@ -71,8 +71,9 @@ const VIEWER = {
    "tier": "forbidden"
   },
   {
-   "tier": "mutant",
-   "locked": true
+   "name": "死者之花",
+   "emo": "🥀",
+   "tier": "mutant"
   }
  ],
  "potions": [
@@ -211,7 +212,7 @@ const VIEWER = {
   }
  ],
  "snapshot": {
-  "phase": 2,
-  "updated": "2026/10/31 23:00"
+  "phase": 3,
+  "updated": "2026/10/31 23:20"
  }
 };
